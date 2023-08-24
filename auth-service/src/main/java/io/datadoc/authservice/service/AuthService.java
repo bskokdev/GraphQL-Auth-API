@@ -70,7 +70,6 @@ public class AuthService {
                       .getBody();
 
       LOGGER.info("Successfully logged in user: {}", form.get(EMAIL_KEY));
-      LOGGER.info("Jwt payload: {}", jwtPayload);
       return jwtPayload;
     } catch (Exception e) {
       LOGGER.error("Error logging in user {} : {}", form.get(EMAIL_KEY), e.getMessage());
