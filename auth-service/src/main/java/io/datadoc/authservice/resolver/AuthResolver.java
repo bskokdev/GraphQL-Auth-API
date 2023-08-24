@@ -27,6 +27,6 @@ public class AuthResolver {
    */
   @QueryMapping
   public LoginResponse login(@Argument LoginCredentials credentials) {
-    return this.authService.login(credentials);
+    return this.authService.issueJwtTokensToUser(credentials);
   }
 }

@@ -6,8 +6,11 @@ spring:
 server:
   port: 8081
 
-
 keycloak:
   realm: mockcompany
-  tokensUrl: http://localhost:8080/realms/mockcompany/protocol/openid-connect/token
   client: datadoc
+  base-url: http://localhost:8080/realms
+  protocol: openid-connect
+  endpoints:
+    token: ${keycloak.base-url}/${keycloak.realm}/protocol/${keycloak.protocol}/token
+    revoke: ${keycloak.base-url}/${keycloak.realm}/protocol/${keycloak.protocol}/revoke

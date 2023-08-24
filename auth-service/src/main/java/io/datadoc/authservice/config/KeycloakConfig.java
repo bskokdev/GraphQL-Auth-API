@@ -11,6 +11,16 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "keycloak")
 public class KeycloakConfig {
   private String realm;
-  private String tokensUrl;
   private String client;
+  private String baseUrl;
+  private String protocol;
+  private Endpoints endpoints;
+
+  @Getter
+  @Setter
+  public static class Endpoints {
+    private String token;
+    private String revoke;
+  }
 }
+

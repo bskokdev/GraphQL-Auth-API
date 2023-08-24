@@ -41,7 +41,7 @@ public class AuthService {
    * @param credentials The user's credentials - email & password.
    * @return LoginResponse containing the JWT tokens or an error object.
    */
-  public LoginResponse login(LoginCredentials credentials) {
+  public LoginResponse issueJwtTokensToUser(LoginCredentials credentials) {
     LOGGER.info("Attempting to login user: {}", credentials.email());
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -52,7 +52,7 @@ public class AuthService {
     httpForm.add(EMAIL_KEY, credentials.email());
     httpForm.add(PASSWORD_KEY, credentials.password());
 
-    return getLoginResponse(headers, httpForm);
+    return fetchKeycloakTokens(headers, httpForm);
   }
 
   /**
@@ -62,13 +62,11 @@ public class AuthService {
    * @param form    The form data to send with the request. (grant_type, client_id, email, password)
    * @return LoginResponse containing the JWT tokens or an error object.
    */
-  private LoginResponse getLoginResponse(HttpHeaders headers, MultiValueMap<String, String> form) {
+  private LoginResponse fetchKeycloakTokens(HttpHeaders headers, MultiValueMap<String, String> form) {
     HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(form, headers);
     try {
-      JwtPayload jwtPayload =
-              restTemplate
-                      .postForEntity(this.keycloakConfig.getTokensUrl(), entity, JwtPayload.class)
-                      .getBody();
+      JwtPayload jwtPayload = restTemplate.postForEntity(
+              this.keycloakConfig.getEndpoints().getToken(), entity, JwtPayload.class).getBody();
 
       LOGGER.info("Successfully logged in user: {}", form.get(EMAIL_KEY));
       return jwtPayload;
