@@ -1,0 +1,26 @@
+# Credentials provided by the user
+input LoginCredentials {
+    email: String!,
+    password: String!
+}
+
+type JwtPayload {
+    accessToken: String!,
+    refreshToken: String!,
+    expiresIn: Int!
+    refreshTokenExpiresIn: Int!
+    tokenType: String!
+}
+
+# In case the credential check fails
+type LoginError {
+    message: String!,
+    code: Int!
+}
+
+# returned to the client
+union LoginResponse = JwtPayload | LoginError
+
+type Query {
+    login(credentials: LoginCredentials): LoginResponse!
+}
