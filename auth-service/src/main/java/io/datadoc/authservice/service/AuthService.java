@@ -6,6 +6,7 @@ import io.datadoc.authservice.model.LoginCredentials;
 import io.datadoc.authservice.model.LoginError;
 import io.datadoc.authservice.model.LoginResponse;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ import static io.datadoc.authservice.config.KeycloakConstants.*;
 @Service
 public class AuthService {
 
-  private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AuthService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
   private final RestTemplate restTemplate;
   private final KeycloakConfig keycloakConfig;
 
