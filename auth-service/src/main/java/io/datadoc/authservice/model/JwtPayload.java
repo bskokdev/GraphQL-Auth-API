@@ -18,6 +18,5 @@ public record JwtPayload(
         @JsonProperty("access_token") String accessToken,
         @JsonProperty("refresh_token") String refreshToken,
         @JsonProperty("expires_in") int expiresIn,
-        @JsonProperty("refresh_expires_in") int refreshTokenExpiresIn)
-        implements LoginResponse {
+        @JsonProperty("refresh_expires_in") int refreshTokenExpiresIn) {
 }

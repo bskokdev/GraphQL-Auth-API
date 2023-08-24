@@ -19,7 +19,11 @@ type LoginError {
 }
 
 # returned to the client
-union LoginResponse = JwtPayload | LoginError
+type LoginResponse {
+    payload: JwtPayload,
+    error: LoginError
+}
+
 
 type Query {
     login(credentials: LoginCredentials): LoginResponse!

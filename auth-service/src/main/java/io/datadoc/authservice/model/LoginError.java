@@ -6,5 +6,5 @@ package io.datadoc.authservice.model;
  * @param message The error message.
  * @param code    The error code.
  */
-public record LoginError(String message, int code) implements LoginResponse {
+public record LoginError(String message, int code) {
 }
