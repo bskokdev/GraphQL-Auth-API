@@ -1,18 +1,21 @@
 package io.datadoc.authservice.service;
 
-import static io.datadoc.authservice.config.KeycloakConstants.*;
-
 import io.datadoc.authservice.config.KeycloakConfig;
 import io.datadoc.authservice.model.JwtPayload;
 import io.datadoc.authservice.model.LoginCredentials;
 import io.datadoc.authservice.model.LoginError;
 import io.datadoc.authservice.model.LoginResponse;
 import org.slf4j.Logger;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import static io.datadoc.authservice.config.KeycloakConstants.*;
 
 /**
  * AuthService provides methods for authenticating users & JWT token management. It uses Keycloak as
@@ -34,8 +37,8 @@ public class AuthService {
   /**
    * Issue a JWT tokens to the user with the given credentials.
    *
-   * @param credentials The user's credentials.
-   * @return LoginResponse containing the JWT tokens or an error message.
+   * @param credentials The user's credentials - email & password.
+   * @return LoginResponse containing the JWT tokens or an error object.
    */
   public LoginResponse login(LoginCredentials credentials) {
     LOGGER.info("Attempting to login user: {}", credentials.email());
@@ -55,16 +58,16 @@ public class AuthService {
    * Calls the token endpoint to get the JWT tokens.
    *
    * @param headers The headers to send with the request.
-   * @param form The form data to send with the request.
-   * @return LoginResponse containing the JWT tokens or an error message.
+   * @param form    The form data to send with the request. (grant_type, client_id, email, password)
+   * @return LoginResponse containing the JWT tokens or an error object.
    */
   private LoginResponse getLoginResponse(HttpHeaders headers, MultiValueMap<String, String> form) {
     HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(form, headers);
     try {
       JwtPayload jwtPayload =
-          restTemplate
-              .postForEntity(this.keycloakConfig.getTokensUrl(), entity, JwtPayload.class)
-              .getBody();
+              restTemplate
+                      .postForEntity(this.keycloakConfig.getTokensUrl(), entity, JwtPayload.class)
+                      .getBody();
 
       LOGGER.info("Successfully logged in user: {}", form.get(EMAIL_KEY));
       LOGGER.info("Jwt payload: {}", jwtPayload);

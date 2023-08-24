@@ -7,6 +7,9 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+/**
+ * AuthResolver provides GraphQL query & mutations methods for authenticating users.
+ */
 @Controller
 public class AuthResolver {
 
@@ -16,6 +19,12 @@ public class AuthResolver {
     this.authService = authService;
   }
 
+  /**
+   * Issue client with a JWT token.
+   *
+   * @param credentials The user's credentials - email & password.
+   * @return LoginResponse containing the JWT tokens or an error object.
+   */
   @QueryMapping
   public LoginResponse login(@Argument LoginCredentials credentials) {
     return this.authService.login(credentials);
