@@ -5,6 +5,10 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * This is a configuration class for the Keycloak.
+ * It provides basic information about the Keycloak instance.
+ */
 @Getter
 @Setter
 @Configuration
