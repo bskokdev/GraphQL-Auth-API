@@ -7,4 +7,5 @@ package io.datadoc.authservice.model;
  * @param code    The error code.
  */
 public record LoginError(String message, int code) {
+
 }

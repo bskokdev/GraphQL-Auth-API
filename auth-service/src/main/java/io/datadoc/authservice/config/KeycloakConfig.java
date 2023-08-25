@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "keycloak")
 public class KeycloakConfig {
+
   private String realm;
   private String client;
   private String baseUrl;
@@ -19,6 +20,7 @@ public class KeycloakConfig {
   @Getter
   @Setter
   public static class Endpoints {
+
     private String token;
     private String revoke;
   }

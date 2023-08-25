@@ -1,5 +1,12 @@
 package io.datadoc.authservice.service;
 
+import static io.datadoc.authservice.config.KeycloakConstants.CLIENT_ID_KEY;
+import static io.datadoc.authservice.config.KeycloakConstants.EMAIL_KEY;
+import static io.datadoc.authservice.config.KeycloakConstants.GRANT_TYPE;
+import static io.datadoc.authservice.config.KeycloakConstants.GRANT_TYPE_KEY;
+import static io.datadoc.authservice.config.KeycloakConstants.PASSWORD_KEY;
+import static io.datadoc.authservice.config.KeycloakConstants.TOKEN_KEY;
+
 import io.datadoc.authservice.config.KeycloakConfig;
 import io.datadoc.authservice.model.JwtPayload;
 import io.datadoc.authservice.model.LoginCredentials;
@@ -7,14 +14,16 @@ import io.datadoc.authservice.model.LoginError;
 import io.datadoc.authservice.model.LoginResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-
-import static io.datadoc.authservice.config.KeycloakConstants.*;
 
 /**
  * AuthService provides methods for authenticating users & JWT token management. It uses Keycloak as
@@ -48,11 +57,17 @@ public class AuthService {
 
     HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(httpForm, getFormHeaders());
     ResponseEntity<JwtPayload> res = postForKeycloakEntity(
-            entity, this.keycloakConfig.getEndpoints().getToken(), JwtPayload.class);
+        entity,
+        this.keycloakConfig.getEndpoints().getToken(),
+        JwtPayload.class
+    );
 
     if (res.getStatusCode() != HttpStatus.OK) {
       LOGGER.error("Error issuing JWT token: {}", res.getStatusCode());
-      return new LoginResponse(null, new LoginError("Error issuing JWT token", res.getStatusCode().value()));
+      return new LoginResponse(
+          null,
+          new LoginError("Error issuing JWT token", res.getStatusCode().value())
+      );
     }
     LOGGER.info("Issued a new JWT token");
     // TODO(bskokdev) - res.getBody() is null for some reason, but credential check is ok
@@ -69,7 +84,12 @@ public class AuthService {
     httpForm.add(TOKEN_KEY, accessToken);
     HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(httpForm, getFormHeaders());
 
-    ResponseEntity<Void> res = postForKeycloakEntity(entity, this.keycloakConfig.getEndpoints().getRevoke(), Void.class);
+    ResponseEntity<Void> res = postForKeycloakEntity(
+        entity,
+        this.keycloakConfig.getEndpoints().getRevoke(),
+        Void.class
+    );
+
     if (res.getStatusCode() != HttpStatus.OK) {
       LOGGER.error("Error revoking JWT token: {}", res.getStatusCode());
       return false;
@@ -90,7 +110,8 @@ public class AuthService {
   }
 
   /**
-   * Handler for a generic Keycloak request.
+   * Handler for POST requests to Keycloak. This method will return the response entity of the given
+   * type or a response entity with the error status code.
    *
    * @param entity       The request entity.
    * @param url          The Keycloak endpoint.
@@ -98,7 +119,8 @@ public class AuthService {
    * @param <T>          The generic type.
    * @return The response entity of the given type.
    */
-  private <T> ResponseEntity<T> postForKeycloakEntity(HttpEntity<MultiValueMap<String, String>> entity, String url, Class<T> responseType) {
+  private <T> ResponseEntity<T> postForKeycloakEntity(
+      HttpEntity<MultiValueMap<String, String>> entity, String url, Class<T> responseType) {
     try {
       return restTemplate.postForEntity(url, entity, responseType);
     } catch (HttpClientErrorException e) {

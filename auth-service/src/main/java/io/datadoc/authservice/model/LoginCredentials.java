@@ -7,4 +7,5 @@ package io.datadoc.authservice.model;
  * @param password The user's password.
  */
 public record LoginCredentials(String email, String password) {
+
 }

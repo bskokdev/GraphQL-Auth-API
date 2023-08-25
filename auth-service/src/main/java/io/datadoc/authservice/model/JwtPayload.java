@@ -14,9 +14,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record JwtPayload(
-        @JsonProperty("token_type") String tokenType,
-        @JsonProperty("access_token") String accessToken,
-        @JsonProperty("refresh_token") String refreshToken,
-        @JsonProperty("expires_in") int expiresIn,
-        @JsonProperty("refresh_expires_in") int refreshTokenExpiresIn) {
+    @JsonProperty("token_type") String tokenType,
+    @JsonProperty("access_token") String accessToken,
+    @JsonProperty("refresh_token") String refreshToken,
+    @JsonProperty("expires_in") int expiresIn,
+    @JsonProperty("refresh_expires_in") int refreshTokenExpiresIn) {
+
 }
