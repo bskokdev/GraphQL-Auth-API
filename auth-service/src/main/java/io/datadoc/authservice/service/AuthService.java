@@ -62,15 +62,18 @@ public class AuthService {
         JwtPayload.class
     );
 
-    if (res.getStatusCode() != HttpStatus.OK) {
+    if (!res.getStatusCode().is2xxSuccessful() || res.getBody() == null) {
       LOGGER.error("Error issuing JWT token: {}", res.getStatusCode());
       return new LoginResponse(
           null,
-          new LoginError("Error issuing JWT token", res.getStatusCode().value())
+          new LoginError(
+              String.format("Error issuing the JWT token - %s", res.getStatusCode()),
+              res.getStatusCode().value()
+          )
       );
     }
-    LOGGER.info("Issued a new JWT token");
-    // TODO(bskokdev) - res.getBody() is null for some reason, but credential check is ok
+
+    LOGGER.info("Issued a new JWT token: {}", res.getStatusCode());
     return new LoginResponse(res.getBody(), null);
   }
 
@@ -91,10 +94,10 @@ public class AuthService {
     );
 
     if (res.getStatusCode() != HttpStatus.OK) {
-      LOGGER.error("Error revoking JWT token: {}", res.getStatusCode());
+      LOGGER.error("Error revoking the JWT token: {}", res.getStatusCode());
       return false;
     }
-    LOGGER.info("Revoked JWT token");
+    LOGGER.info("Revoked JWT token: {}", res.getStatusCode());
     return true;
   }
 
@@ -120,12 +123,17 @@ public class AuthService {
    * @return The response entity of the given type.
    */
   private <T> ResponseEntity<T> postForKeycloakEntity(
-      HttpEntity<MultiValueMap<String, String>> entity, String url, Class<T> responseType) {
+      HttpEntity<MultiValueMap<String, String>> entity,
+      String url,
+      Class<T> responseType
+  ) {
     try {
       return restTemplate.postForEntity(url, entity, responseType);
     } catch (HttpClientErrorException e) {
+      LOGGER.error("HttpClientErrorException during Keycloak request: {}", e.getMessage());
       return new ResponseEntity<>(e.getStatusCode());
     } catch (Exception e) {
+      LOGGER.error("Unexpected error during Keycloak request: {}", e.getMessage(), e);
       return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
