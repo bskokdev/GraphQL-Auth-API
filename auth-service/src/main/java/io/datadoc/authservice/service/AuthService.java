@@ -1,140 +1,99 @@
 package io.datadoc.authservice.service;
 
-import static io.datadoc.authservice.config.KeycloakConstants.CLIENT_ID_KEY;
-import static io.datadoc.authservice.config.KeycloakConstants.EMAIL_KEY;
-import static io.datadoc.authservice.config.KeycloakConstants.GRANT_TYPE;
-import static io.datadoc.authservice.config.KeycloakConstants.GRANT_TYPE_KEY;
-import static io.datadoc.authservice.config.KeycloakConstants.PASSWORD_KEY;
-import static io.datadoc.authservice.config.KeycloakConstants.TOKEN_KEY;
-
-import io.datadoc.authservice.config.KeycloakConfig;
-import io.datadoc.authservice.model.JwtPayload;
-import io.datadoc.authservice.model.LoginCredentials;
-import io.datadoc.authservice.model.LoginError;
-import io.datadoc.authservice.model.LoginResponse;
+import io.datadoc.authservice.model.auth.JwtPayload;
+import io.datadoc.authservice.model.auth.LoginCredentials;
+import io.datadoc.authservice.model.auth.LoginError;
+import io.datadoc.authservice.model.auth.LoginResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 /**
- * AuthService provides methods for authenticating users & JWT token management. It uses Keycloak as
- * the identity provider - refer to the KeycloakConfig class & Keycloak documentation for more
- * details.
+ * AuthService provides methods for authenticating users & JWT token management. It uses
+ * KeycloakService to interact with Keycloak. This service is the high-level abstraction for
+ * authentication = catches all the exceptions.
  */
 @Service
 public class AuthService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
-  private final RestTemplate restTemplate;
-  private final KeycloakConfig keycloakConfig;
+  private final KeycloakService keycloakService;
 
-  public AuthService(RestTemplate restTemplate, KeycloakConfig keycloakConfig) {
-    this.restTemplate = restTemplate;
-    this.keycloakConfig = keycloakConfig;
+  public AuthService(KeycloakService keycloakService) {
+    this.keycloakService = keycloakService;
   }
 
   /**
-   * Issue a JWT tokens to the user with the given credentials.
+   * Issue a JWT tokens to the user based on their credentials.
+   * TODO(bskokdev) - Integration test this.
    *
    * @param credentials The user's credentials - email & password.
    * @return LoginResponse containing the JWT tokens or an error object.
    */
   public LoginResponse issueJwtTokensToUser(LoginCredentials credentials) {
-    MultiValueMap<String, String> httpForm = new LinkedMultiValueMap<>();
-    httpForm.add(GRANT_TYPE_KEY, GRANT_TYPE);
-    httpForm.add(CLIENT_ID_KEY, this.keycloakConfig.getClient());
-    httpForm.add(EMAIL_KEY, credentials.email());
-    httpForm.add(PASSWORD_KEY, credentials.password());
-
-    HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(httpForm, getFormHeaders());
-    ResponseEntity<JwtPayload> res = postForKeycloakEntity(
-        entity,
-        this.keycloakConfig.getEndpoints().getToken(),
-        JwtPayload.class
-    );
-
-    if (!res.getStatusCode().is2xxSuccessful() || res.getBody() == null) {
-      LOGGER.error("Error issuing JWT token: {}", res.getStatusCode());
+    try {
+      JwtPayload jwtPayload = keycloakService.fetchTokensForUser(credentials).getBody();
+      LOGGER.info("Issued a new JWT token");
+      return new LoginResponse(jwtPayload, null);
+    } catch (HttpClientErrorException e) {
+      // Here we catch the client errors - 400, 401, 403 etc.
+      LOGGER.error("Error issuing JWT token: {}", e.getStatusCode());
       return new LoginResponse(
           null,
           new LoginError(
-              String.format("Error issuing the JWT token - %s", res.getStatusCode()),
-              res.getStatusCode().value()
+              String.format("Error issuing the JWT token - %s", e.getStatusCode()),
+              e.getStatusCode().value()
+          )
+      );
+    } catch (Exception e) {
+      // Here we catch the server errors & other unexpected exceptions - 500 etc.
+      LOGGER.error("Error issuing JWT token: {}", e.getMessage());
+      return new LoginResponse(
+          null,
+          new LoginError(
+              String.format("Error issuing the JWT token - %s", e.getMessage()),
+              HttpStatus.INTERNAL_SERVER_ERROR.value()
           )
       );
     }
-
-    LOGGER.info("Issued a new JWT token: {}", res.getStatusCode());
-    return new LoginResponse(res.getBody(), null);
   }
 
   /**
-   * Revoke the given JWT token. This will invalidate the token and the user will be logged out.
+   * Logs out the user with the given ID token.
    *
-   * @param accessToken The JWT token to revoke.
+   * @param idToken ID token previously issued to the user by Keycloak.
+   * @return True if the logout was successful, false otherwise.
    */
-  public boolean revokeJwtToken(String accessToken) {
-    MultiValueMap<String, String> httpForm = new LinkedMultiValueMap<>();
-    httpForm.add(TOKEN_KEY, accessToken);
-    HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(httpForm, getFormHeaders());
-
-    ResponseEntity<Void> res = postForKeycloakEntity(
-        entity,
-        this.keycloakConfig.getEndpoints().getRevoke(),
-        Void.class
-    );
-
-    if (res.getStatusCode() != HttpStatus.OK) {
-      LOGGER.error("Error revoking the JWT token: {}", res.getStatusCode());
+  public boolean logoutBasedOnIdToken(String idToken) {
+    try {
+      keycloakService.logoutKeycloakUser(idToken);
+      LOGGER.info("Successfully logged out user");
+      return true;
+    } catch (Exception e) {
+      LOGGER.error("Error logging out a user: {}", e.getMessage());
       return false;
     }
-    LOGGER.info("Revoked JWT token: {}", res.getStatusCode());
-    return true;
   }
 
   /**
-   * Get the headers for a Keycloak request. This is used for requests that require a form body.
+   * Revokes the given JWT token.
+   * TODO(bskokdev) - Integrate test this.
    *
-   * @return The headers for a Keycloak request.
+   * @param token The JWT token to revoke.
    */
-  private HttpHeaders getFormHeaders() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-    return headers;
-  }
-
-  /**
-   * Handler for POST requests to Keycloak. This method will return the response entity of the given
-   * type or a response entity with the error status code.
-   *
-   * @param entity       The request entity.
-   * @param url          The Keycloak endpoint.
-   * @param responseType The response type class.
-   * @param <T>          The generic type.
-   * @return The response entity of the given type.
-   */
-  private <T> ResponseEntity<T> postForKeycloakEntity(
-      HttpEntity<MultiValueMap<String, String>> entity,
-      String url,
-      Class<T> responseType
-  ) {
+  public boolean revokeJwtToken(String token) {
     try {
-      return restTemplate.postForEntity(url, entity, responseType);
+      keycloakService.revokeKeycloakToken(token);
+      LOGGER.info("Revoked the JWT token");
+      return true;
     } catch (HttpClientErrorException e) {
-      LOGGER.error("HttpClientErrorException during Keycloak request: {}", e.getMessage());
-      return new ResponseEntity<>(e.getStatusCode());
+      LOGGER.error("Error revoking the JWT token: {}", e.getStatusCode());
+      return false;
     } catch (Exception e) {
-      LOGGER.error("Unexpected error during Keycloak request: {}", e.getMessage(), e);
-      return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      LOGGER.error("Error revoking the JWT token: {}", e.getMessage());
+      return false;
     }
   }
 }
