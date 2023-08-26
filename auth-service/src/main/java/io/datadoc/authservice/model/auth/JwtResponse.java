@@ -7,7 +7,7 @@ package io.datadoc.authservice.model.auth;
  * @param payload The JWT tokens.
  * @param error   The error object.
  */
-public record LoginResponse(
+public record JwtResponse(
     JwtPayload payload,
     LoginError error
 ) {

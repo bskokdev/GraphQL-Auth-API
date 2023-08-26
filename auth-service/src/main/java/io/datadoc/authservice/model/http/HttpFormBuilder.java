@@ -28,7 +28,7 @@ public class HttpFormBuilder {
    * @param token JWT token.
    * @return this
    */
-  public HttpFormBuilder withToken(String token) {
+  public HttpFormBuilder withGenericToken(String token) {
     this.httpForm.add("token", token);
     return this;
   }
@@ -41,6 +41,17 @@ public class HttpFormBuilder {
    */
   public HttpFormBuilder withIdToken(String idToken) {
     this.httpForm.add("id_token", idToken);
+    return this;
+  }
+
+  /**
+   * Adds a refresh token to the http form.
+   *
+   * @param refreshToken Refresh token from issued by Keycloak.
+   * @return this
+   */
+  public HttpFormBuilder withRefreshToken(String refreshToken) {
+    this.httpForm.add("refresh_token", refreshToken);
     return this;
   }
 
