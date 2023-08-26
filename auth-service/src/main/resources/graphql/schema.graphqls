@@ -13,18 +13,6 @@ type JwtPayload {
     idToken: String!
 }
 
-# In case the credential check fails
-type ResponseError {
-    message: String!,
-    code: Int!
-}
-
-# returned to the client
-type JwtResponse {
-    payload: JwtPayload,
-    error: ResponseError
-}
-
 # User metadata
 type UserMetadata {
     id: ID!
@@ -35,19 +23,13 @@ type UserMetadata {
     emailVerified: Boolean!
 }
 
-# returned to the client for user information query
-type UserMetadataResponse {
-    userMetadata: UserMetadata,
-    error: ResponseError
-}
-
 type Query {
-    me(accessToken: String!): UserMetadataResponse!
+    me(accessToken: String!): UserMetadata!
 }
 
 type Mutation {
-    login(credentials: LoginCredentials): JwtResponse!
+    login(credentials: LoginCredentials): JwtPayload!
     logout(idToken: String!): Boolean!
-    refresh(refreshToken: String!): JwtResponse!
+    refresh(refreshToken: String!): JwtPayload!
     revoke(token: String!): Boolean!
 }

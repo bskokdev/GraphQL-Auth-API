@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class KeycloakService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(KeycloakService.class);
   private final RestTemplate restTemplate;
   private final KeycloakConfig keycloakConfig;
   private final HttpService httpService;
