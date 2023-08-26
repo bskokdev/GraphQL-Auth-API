@@ -6,8 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * This is a configuration class for the Keycloak.
- * It provides basic information about the Keycloak instance.
+ * This is a configuration class for the Keycloak. It provides basic information about the Keycloak
+ * instance.
  */
 @Getter
 @Setter
@@ -16,10 +16,18 @@ import org.springframework.context.annotation.Configuration;
 public class KeycloakConfig {
 
   private String realm;
-  private String client;
+  private Client client;
   private String baseUrl;
   private String protocol;
   private Endpoints endpoints;
+
+  @Getter
+  @Setter
+  public static class Client {
+
+    private String id;
+    private String secret;
+  }
 
   @Getter
   @Setter
@@ -27,6 +35,7 @@ public class KeycloakConfig {
 
     private String token;
     private String revoke;
+    private String logout;
   }
 }
 

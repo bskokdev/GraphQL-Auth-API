@@ -8,9 +8,12 @@ server:
 
 keycloak:
   realm: mockcompany
-  client: datadoc
+  client:
+    id: datadoc-api
+    secret: vrwQMc5QHD9Znpi2Per30LTSKZ2YoXuR
   base-url: http://localhost:8080/realms
   protocol: openid-connect
   endpoints:
     token: ${keycloak.base-url}/${keycloak.realm}/protocol/${keycloak.protocol}/token
     revoke: ${keycloak.base-url}/${keycloak.realm}/protocol/${keycloak.protocol}/revoke
+    userinfo: ${keycloak.base-url}/${keycloak.realm}/protocol/${keycloak.protocol}/logout
