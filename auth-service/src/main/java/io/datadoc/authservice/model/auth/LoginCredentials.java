@@ -1,4 +1,4 @@
-package io.datadoc.authservice.model;
+package io.datadoc.authservice.model.auth;
 
 /**
  * LoginCredentials represents the user's credentials.

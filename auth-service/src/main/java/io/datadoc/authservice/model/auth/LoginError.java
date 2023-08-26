@@ -1,4 +1,4 @@
-package io.datadoc.authservice.model;
+package io.datadoc.authservice.model.auth;
 
 /**
  * LoginError represents an error response from the Keycloak token endpoint.

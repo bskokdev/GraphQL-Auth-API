@@ -1,4 +1,4 @@
-package io.datadoc.authservice.model;
+package io.datadoc.authservice.model.auth;
 
 /**
  * Response from the login endpoint to the client. Contains the JWT tokens & an error object. Both
