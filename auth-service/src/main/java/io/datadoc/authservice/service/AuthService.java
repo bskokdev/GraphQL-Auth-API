@@ -14,6 +14,7 @@ import org.springframework.web.client.HttpClientErrorException;
  * AuthService provides methods for authenticating users & JWT token management. It uses
  * KeycloakService to interact with Keycloak. This service is the high-level abstraction for
  * authentication = catches all the exceptions.
+ * TODO(bskokdev) - add integration tests for this service.
  */
 @Service
 public class AuthService {
@@ -27,7 +28,6 @@ public class AuthService {
 
   /**
    * Issue a JWT tokens to the user based on their credentials.
-   * TODO(bskokdev) - Integration test this.
    *
    * @param credentials The user's credentials - email & password.
    * @return LoginResponse containing the JWT tokens or an error object.
@@ -79,7 +79,6 @@ public class AuthService {
 
   /**
    * Revokes the given JWT token.
-   * TODO(bskokdev) - Integrate test this.
    *
    * @param token The JWT token to revoke.
    */
