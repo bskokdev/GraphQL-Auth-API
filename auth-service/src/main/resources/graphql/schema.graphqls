@@ -10,6 +10,7 @@ type JwtPayload {
     expiresIn: Int!
     refreshTokenExpiresIn: Int!
     tokenType: String!
+    idToken: String!
 }
 
 # In case the credential check fails
@@ -30,4 +31,6 @@ type Query {
 
 type Mutation {
     login(credentials: LoginCredentials): LoginResponse!
+    revoke(refreshToken: String!): Boolean!
+    logout(idToken: String!): Boolean!
 }
