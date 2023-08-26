@@ -16,4 +16,4 @@ keycloak:
   endpoints:
     token: ${keycloak.base-url}/${keycloak.realm}/protocol/${keycloak.protocol}/token
     revoke: ${keycloak.base-url}/${keycloak.realm}/protocol/${keycloak.protocol}/revoke
-    userinfo: ${keycloak.base-url}/${keycloak.realm}/protocol/${keycloak.protocol}/logout
+    logout: ${keycloak.base-url}/${keycloak.realm}/protocol/${keycloak.protocol}/logout
