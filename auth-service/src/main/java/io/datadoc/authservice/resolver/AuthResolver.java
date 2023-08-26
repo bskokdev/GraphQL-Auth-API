@@ -21,10 +21,11 @@ public class AuthResolver {
   }
 
   /**
-   * User will be issued JWT tokens (access, refresh, id) based on their credentials.
+   * User will be issued with JWT tokens (access, refresh, id) based on their credentials.
    *
-   * @param credentials The user's credentials - email & password.
-   * @return LoginResponse containing the JWT tokens & error object if any.
+   * @param credentials User's email & password object.
+   * @return JwtResponse containing the JWT tokens & possibly non-null error object.
+   * @see JwtResponse
    */
   @MutationMapping
   public JwtResponse login(@Argument LoginCredentials credentials) {
@@ -42,13 +43,20 @@ public class AuthResolver {
     return this.authService.logoutBasedOnIdToken(idToken);
   }
 
+  /**
+   * Refreshes a user's JWT tokens based on a refresh token - issues new JwtPayload to the user.
+   *
+   * @param refreshToken The user's refresh token.
+   * @return JwtResponse containing the JWT tokens & possibly non-null error object.
+   * @see JwtResponse
+   */
   @MutationMapping
   public JwtResponse refresh(@Argument String refreshToken) {
     return this.authService.refreshUserTokens(refreshToken);
   }
 
   /**
-   * Revokes a JWT token.
+   * Revokes a JWT token - invalidates the token.
    *
    * @param token The JWT token to revoke.
    * @return true if the token was revoked successfully, false otherwise.

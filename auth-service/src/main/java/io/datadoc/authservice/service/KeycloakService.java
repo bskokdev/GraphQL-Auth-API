@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * This class provides methods for interacting with Keycloak. Its main purpose is to interact with
- * Keycloak endpoints.
+ * Keycloak REST endpoints. The http requests are made using Spring's RestTemplate.
  * TODO(bskokdev) - Add integration tests!!!.
  */
 @Service
@@ -42,7 +42,7 @@ public class KeycloakService {
    * Request JWT tokens from Keycloak instance for the user with the given credentials.
    *
    * @param credentials The user's credentials - email & password.
-   * @return LoginResponse containing the JWT tokens.
+   * @return ResponseEntity with JwtPayload containing the JWT tokens.
    * @throws HttpStatusCodeException If the request to Keycloak fails.
    */
   public ResponseEntity<JwtPayload> fetchTokensForUser(LoginCredentials credentials)
@@ -65,11 +65,10 @@ public class KeycloakService {
   }
 
   /**
-   * Refreshes the user's JWT tokens based on the refresh token. Makes a request to Keycloak token
-   * endpoint.
+   * Request tokens refresh from Keycloak instance for the user with the given refresh token.
    *
    * @param refreshToken The refresh token issued to the user by Keycloak.
-   * @return JwtPayload containing the JWT tokens.
+   * @return ResponseEntity with JwtPayload containing the JWT tokens.
    * @throws HttpStatusCodeException If the request to Keycloak fails - Unauthorized, Bad Request
    */
   public ResponseEntity<JwtPayload> refreshTokens(String refreshToken)
@@ -90,8 +89,7 @@ public class KeycloakService {
   }
 
   /**
-   * Request Keycloak to revoke the given JWT token. This requires a client access token - refer to
-   * the KeycloakConfig class & Keycloak docs.
+   * Request Keycloak to revoke the given JWT token.
    *
    * @param token JWT token to be revoked.
    * @throws HttpStatusCodeException If the request to Keycloak fails - Unauthorized, Bad Request
@@ -115,7 +113,7 @@ public class KeycloakService {
   /**
    * Request Keycloak to log out a user based on their ID token.
    *
-   * @param idToken ID token previously issued to the user by Keycloak.
+   * @param idToken ID token issued upon user login.
    * @throws HttpStatusCodeException If the request to Keycloak fails - Unauthorized, Bad Request
    */
   public ResponseEntity<String> logoutKeycloakUser(String idToken) throws HttpStatusCodeException {

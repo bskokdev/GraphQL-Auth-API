@@ -12,9 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
 /**
- * AuthService provides methods for authenticating users & JWT token management. It uses
- * KeycloakService to interact with Keycloak. This service is the high-level abstraction for
- * authentication = catches all the exceptions.
+ * AuthService provides methods JWT token management. It uses KeycloakService to interact with the
+ * Keycloak instance. This service is the high-level abstraction for authentication.
  * TODO(bskokdev) - add integration tests for this service.
  */
 @Service
@@ -28,10 +27,10 @@ public class AuthService {
   }
 
   /**
-   * Issue a JWT tokens to the user based on their credentials.
+   * Issue JWT tokens to the user based on their credentials.
    *
-   * @param credentials The user's credentials - email & password.
-   * @return LoginResponse containing the JWT tokens or an error object.
+   * @param credentials user's email & password object.
+   * @return LoginResponse containing the JWT tokens & possibly non-null error object.
    */
   public JwtResponse issueJwtTokensToUser(LoginCredentials credentials) {
     try {
@@ -40,7 +39,7 @@ public class AuthService {
       return new JwtResponse(response.getBody(), null);
     } catch (HttpClientErrorException e) {
       // Catch the client errors - unauthorized, bad request etc.
-      LOGGER.error("ERROR issuing JWT token: {}", e.getStatusCode());
+      LOGGER.error("ERROR issuing JWT token - {}", e.getStatusCode());
       return new JwtResponse(
           null,
           new LoginError(
@@ -51,7 +50,7 @@ public class AuthService {
     } catch (Exception e) {
       // Catch all other exceptions - server, network etc.
       // We don't want to expose the exception message to the client.
-      LOGGER.error("ERROR issuing JWT token: {}", e.getMessage());
+      LOGGER.error("ERROR issuing JWT token - {}", e.getMessage());
       return new JwtResponse(
           null,
           new LoginError(
@@ -63,10 +62,10 @@ public class AuthService {
   }
 
   /**
-   * Refreshes the user's JWT tokens based on the refresh token.
+   * Refreshes the user's JWT tokens based on their refresh token.
    *
-   * @param refreshToken The refresh token issued to the user by Keycloak.
-   * @return LoginResponse containing the JWT tokens & possibly an error object.
+   * @param refreshToken JWT refresh token.
+   * @return LoginResponse containing the JWT tokens & possibly non-null error object.
    */
   public JwtResponse refreshUserTokens(String refreshToken) {
     try {
@@ -98,9 +97,9 @@ public class AuthService {
   }
 
   /**
-   * Logs out the user with the given ID token.
+   * Logs out the user out of the session based on their ID token.
    *
-   * @param idToken ID token previously issued to the user by Keycloak.
+   * @param idToken The user's ID token - this is issued upon login.
    * @return True if the logout was successful, false otherwise.
    */
   public boolean logoutBasedOnIdToken(String idToken) {
@@ -118,6 +117,7 @@ public class AuthService {
    * Revokes the given JWT token.
    *
    * @param token The JWT token to revoke.
+   * @return True if the token was revoked successfully, false otherwise.
    */
   public boolean revokeJwtToken(String token) {
     try {
