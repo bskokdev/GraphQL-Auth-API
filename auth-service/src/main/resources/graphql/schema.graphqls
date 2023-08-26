@@ -20,7 +20,7 @@ type LoginError {
 }
 
 # returned to the client
-type LoginResponse {
+type JwtResponse {
     payload: JwtPayload,
     error: LoginError
 }
@@ -30,7 +30,8 @@ type Query {
 }
 
 type Mutation {
-    login(credentials: LoginCredentials): LoginResponse!
-    revoke(refreshToken: String!): Boolean!
+    login(credentials: LoginCredentials): JwtResponse!
     logout(idToken: String!): Boolean!
+    refresh(refreshToken: String!): JwtResponse!
+    revoke(token: String!): Boolean!
 }
