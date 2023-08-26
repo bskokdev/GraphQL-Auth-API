@@ -9,7 +9,7 @@ package io.datadoc.authservice.model.auth;
  */
 public record JwtResponse(
     JwtPayload payload,
-    LoginError error
+    ResponseError error
 ) {
 
 }

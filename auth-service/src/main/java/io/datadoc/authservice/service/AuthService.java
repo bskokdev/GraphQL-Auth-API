@@ -3,7 +3,9 @@ package io.datadoc.authservice.service;
 import io.datadoc.authservice.model.auth.JwtPayload;
 import io.datadoc.authservice.model.auth.JwtResponse;
 import io.datadoc.authservice.model.auth.LoginCredentials;
-import io.datadoc.authservice.model.auth.LoginError;
+import io.datadoc.authservice.model.auth.ResponseError;
+import io.datadoc.authservice.model.auth.UserMetadata;
+import io.datadoc.authservice.model.auth.UserMetadataResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -42,7 +44,7 @@ public class AuthService {
       LOGGER.error("ERROR issuing JWT token - {}", e.getStatusCode());
       return new JwtResponse(
           null,
-          new LoginError(
+          new ResponseError(
               String.format("ERROR issuing the JWT token - %s", e.getStatusCode()),
               e.getStatusCode().value()
           )
@@ -53,8 +55,43 @@ public class AuthService {
       LOGGER.error("ERROR issuing JWT token - {}", e.getMessage());
       return new JwtResponse(
           null,
-          new LoginError(
+          new ResponseError(
               "Internal server error issuing the JWT token",
+              HttpStatus.INTERNAL_SERVER_ERROR.value()
+          )
+      );
+    }
+  }
+
+  /**
+   * Returns the user's information based on their access token.
+   *
+   * @param accessToken The user's access token.
+   * @return UserInfo object containing the user's information.
+   */
+  public UserMetadataResponse getUserMetadata(String accessToken) {
+    try {
+      ResponseEntity<UserMetadata> response = keycloakService.fetchUser(accessToken);
+      LOGGER.info("Successfully fetched user info - {}", response.getStatusCode());
+      return new UserMetadataResponse(response.getBody(), null);
+    } catch (HttpClientErrorException e) {
+      // Catch the client errors - unauthorized, bad request etc.
+      LOGGER.error("ERROR fetching user info - {}", e.getStatusCode());
+      return new UserMetadataResponse(
+          null,
+          new ResponseError(
+              String.format("ERROR fetching user info - %s", e.getStatusCode()),
+              e.getStatusCode().value()
+          )
+      );
+    } catch (Exception e) {
+      // Catch all other exceptions - server, network etc.
+      // We don't want to expose the exception message to the client.
+      LOGGER.error("ERROR fetching user info - {}", e.getMessage());
+      return new UserMetadataResponse(
+          null,
+          new ResponseError(
+              "Internal server error fetching user info",
               HttpStatus.INTERNAL_SERVER_ERROR.value()
           )
       );
@@ -77,7 +114,7 @@ public class AuthService {
       LOGGER.error("ERROR refreshing the JWT token - {}", e.getStatusCode());
       return new JwtResponse(
           null,
-          new LoginError(
+          new ResponseError(
               String.format("ERROR refreshing the JWT token - %s", e.getStatusCode()),
               e.getStatusCode().value()
           )
@@ -88,7 +125,7 @@ public class AuthService {
       LOGGER.error("ERROR issuing JWT token - {}", e.getMessage());
       return new JwtResponse(
           null,
-          new LoginError(
+          new ResponseError(
               "Internal server error issuing the JWT token",
               HttpStatus.INTERNAL_SERVER_ERROR.value()
           )

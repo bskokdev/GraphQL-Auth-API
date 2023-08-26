@@ -3,12 +3,14 @@ package io.datadoc.authservice.service;
 import io.datadoc.authservice.config.KeycloakConfig;
 import io.datadoc.authservice.model.auth.JwtPayload;
 import io.datadoc.authservice.model.auth.LoginCredentials;
+import io.datadoc.authservice.model.auth.UserMetadata;
 import io.datadoc.authservice.model.http.HttpFormBuilder;
 import io.datadoc.authservice.model.http.HttpGrantType;
 import io.datadoc.authservice.model.http.HttpScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -63,6 +65,24 @@ public class KeycloakService {
         JwtPayload.class
     );
   }
+
+  /**
+   * Request user information from Keycloak instance for the user with the given access token.
+   *
+   * @param accessToken The user's access token.
+   * @return ResponseEntity with UserMetadata containing the user's information.
+   * @throws HttpStatusCodeException If the request to Keycloak fails - Unauthorized, Bad Request
+   */
+  public ResponseEntity<UserMetadata> fetchUser(String accessToken) throws HttpStatusCodeException {
+    LOGGER.info("Keycloak requesting user info...");
+    return restTemplate.exchange(
+        this.keycloakConfig.getEndpoints().getUserInfo(),
+        HttpMethod.GET,
+        new HttpEntity<>(null, this.httpService.getHttpFormHeaders(accessToken)),
+        UserMetadata.class
+    );
+  }
+
 
   /**
    * Request tokens refresh from Keycloak instance for the user with the given refresh token.

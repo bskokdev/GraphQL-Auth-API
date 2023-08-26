@@ -14,7 +14,7 @@ type JwtPayload {
 }
 
 # In case the credential check fails
-type LoginError {
+type ResponseError {
     message: String!,
     code: Int!
 }
@@ -22,11 +22,27 @@ type LoginError {
 # returned to the client
 type JwtResponse {
     payload: JwtPayload,
-    error: LoginError
+    error: ResponseError
+}
+
+# User metadata
+type UserMetadata {
+    id: ID!
+    username: String!
+    firstName: String
+    lastName: String
+    email: String!
+    emailVerified: Boolean!
+}
+
+# returned to the client for user information query
+type UserMetadataResponse {
+    userMetadata: UserMetadata,
+    error: ResponseError
 }
 
 type Query {
-    ping: String @deprecated(reason: "https://stackoverflow.com/questions/59868942/graphql-a-schema-must-have-a-query-operation-defined")
+    me(accessToken: String!): UserMetadataResponse!
 }
 
 type Mutation {

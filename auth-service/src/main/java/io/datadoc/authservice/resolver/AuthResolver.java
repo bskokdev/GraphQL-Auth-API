@@ -2,9 +2,11 @@ package io.datadoc.authservice.resolver;
 
 import io.datadoc.authservice.model.auth.JwtResponse;
 import io.datadoc.authservice.model.auth.LoginCredentials;
+import io.datadoc.authservice.model.auth.UserMetadataResponse;
 import io.datadoc.authservice.service.AuthService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -30,6 +32,17 @@ public class AuthResolver {
   @MutationMapping
   public JwtResponse login(@Argument LoginCredentials credentials) {
     return this.authService.issueJwtTokensToUser(credentials);
+  }
+
+  /**
+   * Returns the user's information based on their access token.
+   *
+   * @param accessToken The user's access token.
+   * @return UserInfo object containing the user's information.
+   */
+  @QueryMapping
+  public UserMetadataResponse me(@Argument String accessToken) {
+    return this.authService.getUserMetadata(accessToken);
   }
 
   /**

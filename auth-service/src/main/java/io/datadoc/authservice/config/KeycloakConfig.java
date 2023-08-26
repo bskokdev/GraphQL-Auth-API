@@ -36,6 +36,7 @@ public class KeycloakConfig {
     private String token;
     private String revoke;
     private String logout;
+    private String userInfo;
   }
 }
 
