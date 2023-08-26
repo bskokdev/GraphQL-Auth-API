@@ -1,4 +1,4 @@
-package io.datadoc.authservice.model.http;
+package io.datadoc.authservice.service;
 
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;

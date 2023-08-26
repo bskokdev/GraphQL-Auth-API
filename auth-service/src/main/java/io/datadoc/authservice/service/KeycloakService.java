@@ -4,7 +4,6 @@ import io.datadoc.authservice.config.KeycloakConfig;
 import io.datadoc.authservice.model.auth.JwtPayload;
 import io.datadoc.authservice.model.auth.LoginCredentials;
 import io.datadoc.authservice.model.auth.UserMetadata;
-import io.datadoc.authservice.model.http.HttpFormBuilder;
 import io.datadoc.authservice.model.http.HttpGrantType;
 import io.datadoc.authservice.model.http.HttpScope;
 import org.slf4j.Logger;
