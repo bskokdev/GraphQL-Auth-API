@@ -1,7 +1,7 @@
 package io.datadoc.authservice.resolver;
 
+import io.datadoc.authservice.model.auth.JwtResponse;
 import io.datadoc.authservice.model.auth.LoginCredentials;
-import io.datadoc.authservice.model.auth.LoginResponse;
 import io.datadoc.authservice.service.AuthService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -27,7 +27,7 @@ public class AuthResolver {
    * @return LoginResponse containing the JWT tokens & error object if any.
    */
   @MutationMapping
-  public LoginResponse login(@Argument LoginCredentials credentials) {
+  public JwtResponse login(@Argument LoginCredentials credentials) {
     return this.authService.issueJwtTokensToUser(credentials);
   }
 
@@ -40,6 +40,11 @@ public class AuthResolver {
   @MutationMapping
   public boolean logout(@Argument String idToken) {
     return this.authService.logoutBasedOnIdToken(idToken);
+  }
+
+  @MutationMapping
+  public JwtResponse refresh(@Argument String refreshToken) {
+    return this.authService.refreshUserTokens(refreshToken);
   }
 
   /**

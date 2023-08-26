@@ -1,12 +1,13 @@
 package io.datadoc.authservice.service;
 
 import io.datadoc.authservice.model.auth.JwtPayload;
+import io.datadoc.authservice.model.auth.JwtResponse;
 import io.datadoc.authservice.model.auth.LoginCredentials;
 import io.datadoc.authservice.model.auth.LoginError;
-import io.datadoc.authservice.model.auth.LoginResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -32,28 +33,64 @@ public class AuthService {
    * @param credentials The user's credentials - email & password.
    * @return LoginResponse containing the JWT tokens or an error object.
    */
-  public LoginResponse issueJwtTokensToUser(LoginCredentials credentials) {
+  public JwtResponse issueJwtTokensToUser(LoginCredentials credentials) {
     try {
-      JwtPayload jwtPayload = keycloakService.fetchTokensForUser(credentials).getBody();
-      LOGGER.info("Issued a new JWT token");
-      return new LoginResponse(jwtPayload, null);
+      ResponseEntity<JwtPayload> response = keycloakService.fetchTokensForUser(credentials);
+      LOGGER.info("Successfully issued a new JWT token - {}", response.getStatusCode());
+      return new JwtResponse(response.getBody(), null);
     } catch (HttpClientErrorException e) {
-      // Here we catch the client errors - 400, 401, 403 etc.
-      LOGGER.error("Error issuing JWT token: {}", e.getStatusCode());
-      return new LoginResponse(
+      // Catch the client errors - unauthorized, bad request etc.
+      LOGGER.error("ERROR issuing JWT token: {}", e.getStatusCode());
+      return new JwtResponse(
           null,
           new LoginError(
-              String.format("Error issuing the JWT token - %s", e.getStatusCode()),
+              String.format("ERROR issuing the JWT token - %s", e.getStatusCode()),
               e.getStatusCode().value()
           )
       );
     } catch (Exception e) {
-      // Here we catch the server errors & other unexpected exceptions - 500 etc.
-      LOGGER.error("Error issuing JWT token: {}", e.getMessage());
-      return new LoginResponse(
+      // Catch all other exceptions - server, network etc.
+      // We don't want to expose the exception message to the client.
+      LOGGER.error("ERROR issuing JWT token: {}", e.getMessage());
+      return new JwtResponse(
           null,
           new LoginError(
-              String.format("Error issuing the JWT token - %s", e.getMessage()),
+              "Internal server error issuing the JWT token",
+              HttpStatus.INTERNAL_SERVER_ERROR.value()
+          )
+      );
+    }
+  }
+
+  /**
+   * Refreshes the user's JWT tokens based on the refresh token.
+   *
+   * @param refreshToken The refresh token issued to the user by Keycloak.
+   * @return LoginResponse containing the JWT tokens & possibly an error object.
+   */
+  public JwtResponse refreshUserTokens(String refreshToken) {
+    try {
+      ResponseEntity<JwtPayload> response = keycloakService.refreshTokens(refreshToken);
+      LOGGER.info("Successfully refreshed the JWT token - {}", response.getStatusCode());
+      return new JwtResponse(response.getBody(), null);
+    } catch (HttpClientErrorException e) {
+      // Catch the client errors - unauthorized, bad request etc.
+      LOGGER.error("ERROR refreshing the JWT token - {}", e.getStatusCode());
+      return new JwtResponse(
+          null,
+          new LoginError(
+              String.format("ERROR refreshing the JWT token - %s", e.getStatusCode()),
+              e.getStatusCode().value()
+          )
+      );
+    } catch (Exception e) {
+      // Catch all other exceptions - server, network etc.
+      // We don't want to expose the exception message to the client.
+      LOGGER.error("ERROR issuing JWT token - {}", e.getMessage());
+      return new JwtResponse(
+          null,
+          new LoginError(
+              "Internal server error issuing the JWT token",
               HttpStatus.INTERNAL_SERVER_ERROR.value()
           )
       );
@@ -68,11 +105,11 @@ public class AuthService {
    */
   public boolean logoutBasedOnIdToken(String idToken) {
     try {
-      keycloakService.logoutKeycloakUser(idToken);
-      LOGGER.info("Successfully logged out user");
+      ResponseEntity<String> response = keycloakService.logoutKeycloakUser(idToken);
+      LOGGER.info("Successfully logged out user - {}", response.getStatusCode());
       return true;
     } catch (Exception e) {
-      LOGGER.error("Error logging out a user: {}", e.getMessage());
+      LOGGER.error("ERROR logging out a user");
       return false;
     }
   }
@@ -84,14 +121,11 @@ public class AuthService {
    */
   public boolean revokeJwtToken(String token) {
     try {
-      keycloakService.revokeKeycloakToken(token);
-      LOGGER.info("Revoked the JWT token");
+      ResponseEntity<String> res = keycloakService.revokeKeycloakToken(token);
+      LOGGER.info("Successfully revoked the JWT token - {}", res.getStatusCode());
       return true;
-    } catch (HttpClientErrorException e) {
-      LOGGER.error("Error revoking the JWT token: {}", e.getStatusCode());
-      return false;
     } catch (Exception e) {
-      LOGGER.error("Error revoking the JWT token: {}", e.getMessage());
+      LOGGER.error("ERROR revoking the JWT token");
       return false;
     }
   }
