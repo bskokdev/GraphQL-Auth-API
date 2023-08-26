@@ -4,8 +4,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Builder for creating a MultiValueMap for HTTP form data. This form is used for making requests to
- * Keycloak and passing in the required parameters.
+ * Builder for creating a MultiValueMap for HTTP form data. This form is used to pass parameters to
+ * an HTTP request.
  */
 public class HttpFormBuilder {
 
