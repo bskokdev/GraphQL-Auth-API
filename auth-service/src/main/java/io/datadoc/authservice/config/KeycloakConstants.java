@@ -1,16 +1,13 @@
 package io.datadoc.authservice.config;
 
 /**
- * Constants used for Keycloak authentication http form.
+ * Constants used for Keycloak authentication.
  */
 public final class KeycloakConstants {
 
-  public static final String GRANT_TYPE_KEY = "grant_type";
-  public static final String GRANT_TYPE = "password";
-  public static final String CLIENT_ID_KEY = "client_id";
-  public static final String TOKEN_KEY = "access_token";
-  public static final String EMAIL_KEY = "username";
-  public static final String PASSWORD_KEY = "password";
+  public static final String GRANT_TYPE_PASSWORD = "password";
+  public static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
+  public static final String SCOPE_OPENID = "openid";
 
   private KeycloakConstants() {
     throw new IllegalStateException("Utility class");
