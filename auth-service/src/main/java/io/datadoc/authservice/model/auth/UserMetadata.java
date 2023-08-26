@@ -3,6 +3,16 @@ package io.datadoc.authservice.model.auth;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * UserMetadata contains the user's information stored in Keycloak.
+ *
+ * @param id            user's ID
+ * @param username      user's username
+ * @param firstName     user's first name
+ * @param lastName      user's last name
+ * @param email         user's email
+ * @param emailVerified true if the user's email is verified, false otherwise.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record UserMetadata(
     @JsonProperty("sub") String id,
