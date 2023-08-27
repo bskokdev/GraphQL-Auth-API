@@ -1,0 +1,43 @@
+version: '3.7'
+
+services:
+  auth-service:
+    image: auth-service
+    build:
+      context: .
+      dockerfile: ./auth-service/Dockerfile
+    networks:
+      - app-network
+    environment:
+      - KEYCLOAK_REALM=mockrealm
+      - KEYCLOAK_CLIENT_ID=auth-api
+      - KEYCLOAK_CLIENT_SECRET=vrwQMc5QHD9Znpi2Per30LTSKZ2YoXuR
+      - KEYCLOAK_BASE_URL=http://keycloak:8080/realms
+      - KEYCLOAK_PROTOCOL=openid-connect
+    ports:
+      - "8081:8081"
+    depends_on:
+      - keycloak
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.1
+    networks:
+      - app-network
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KEYCLOAK_IMPORT=/tmp/mock-realm.json
+    command:
+      - "start-dev"
+      - "-Dkeycloak.migration.action=import"
+      - "-Dkeycloak.migration.provider=singleFile"
+      - "-Dkeycloak.migration.file=/tmp/mock-realm.json"
+      - "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
+    volumes:
+      - ./mock-realm.json:/tmp/mock-realm.json
+    ports:
+      - "8080:8080"
+
+networks:
+  app-network:
+    driver: bridge
