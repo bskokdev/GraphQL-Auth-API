@@ -21,7 +21,7 @@ The API provides several queries and mutations to manage users and their roles
 4. Access the GraphQL API at http://localhost:8081/graphiql
 
 
-Note: Ideally the secret would be stored in an `.env` file (lol)
+Note: Ideally the secret would be stored in an `.env` file. But since this is a demo project it's simplest to include the secret to the mock realm directly in the config.
 
 ## GraphQL Queries and Mutations
 
